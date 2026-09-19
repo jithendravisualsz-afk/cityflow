@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityFlow AI — Executive Mission Control</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Outfit (Headings) + DM Sans (Body) + JetBrains Mono (Telemetry) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="assets/css/main.css">
+
+  <!-- Local Network Data -->
+  <script src="assets/data/network_data.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-[#070b14] dark:text-slate-100 min-h-screen flex antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-300 relative overflow-x-hidden">
+
+  <!-- REALISTIC QUADCOPTER DRONE SURVEILLANCE BACKGROUND CANVAS -->
+  <canvas id="droneCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- ================= UNIFIED APPLICATION SIDEBAR ================= -->
+  <aside id="sidebar" class="w-64 liquid-glass-sidebar border-r border-slate-200/80 dark:border-white/10 flex flex-col justify-between p-4 z-40 relative theme-transition shrink-0 min-h-screen">
+    <div class="flex flex-col gap-6">
+      
+      <!-- Brand & Hamburger Toggle -->
+      <div class="flex items-center justify-between px-2 pt-1">
+        <div class="flex items-center gap-3 sidebar-expanded-text overflow-hidden">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
+            <i data-lucide="activity" class="w-5 h-5 text-white"></i>
+          </div>
+          <div class="flex flex-col leading-tight">
+            <span class="font-black text-lg tracking-tight font-heading bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">CityFlow AI</span>
+            <span class="text-[10px] tracking-wider uppercase font-semibold text-slate-400 dark:text-slate-400">Hyderabad Hub</span>
+          </div>
+        </div>
+
+        <!-- 3-Line Hamburger Button -->
+        <button onclick="CityFlow.toggleSidebar()" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors focus:outline-none" title="Toggle Sidebar">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex flex-col gap-1.5 pt-2">
+        <a href="index.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">Mission Control</span>
+        </a>
+        <a href="commuter.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="map-pin" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">Commuter Portal</span>
+        </a>
+        <a href="report.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="megaphone" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">Report Incident</span>
+        </a>
+        <a href="police.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="shield-alert" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">Tactical Police</span>
+        </a>
+        <a href="planner.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="git-pull-request" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">Infrastructure</span>
+        </a>
+        <a href="forecaster.html" class="sidebar-nav-item flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium border border-transparent transition-all">
+          <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
+          <span class="sidebar-expanded-text">AI Forecaster</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Controls & Theme Switcher -->
+    <div class="flex flex-col gap-3 pt-4 border-t border-slate-200/80 dark:border-white/10">
+      <div class="flex items-center justify-between px-2">
+        <span class="text-xs text-slate-500 dark:text-slate-400 sidebar-expanded-text">Theme Mode</span>
+        <button onclick="CityFlow.toggleTheme()" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/10 transition-colors" title="Toggle Light/Dark Theme">
+          <i id="theme-moon" data-lucide="moon" class="w-4 h-4 hidden"></i>
+          <i id="theme-sun" data-lucide="sun" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- System Telemetry Badge -->
+      <div class="liquid-glass-subtle p-3 rounded-xl flex items-center gap-3 sidebar-expanded-text">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-dot shrink-0"></div>
+        <div class="flex flex-col leading-none">
+          <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">NeurAX LightGBM</span>
+          <span class="text-[9px] text-slate-400 font-mono mt-0.5">Latency 1.15s • CPU Zero-GPU</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN VIEWPORT CONTENT ================= -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative z-10">
+
+    <!-- Top Executive Header -->
+    <header class="h-16 liquid-glass border-b border-slate-200/80 dark:border-white/10 px-8 flex items-center justify-between sticky top-0 z-30 shrink-0 theme-transition">
+      <div class="flex items-center gap-3">
+        <h1 class="text-lg font-bold tracking-tight font-heading text-slate-900 dark:text-white">Executive Mission Control</h1>
+        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">Live Corridor Telemetry</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-xl liquid-glass-subtle text-slate-600 dark:text-slate-300">
+          <i data-lucide="radio" class="w-3.5 h-3.5 text-emerald-500 animate-pulse"></i>
+          <span>SURVEILLANCE: ACTIVE</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span id="live-time" class="font-mono">Hyderabad IST</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Executive Content Body -->
+    <main class="flex-1 p-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
+
+      <!-- Hero City Status Banner with Liquid Glass -->
+      <section class="liquid-glass rounded-3xl p-8 relative overflow-hidden theme-transition border border-white/40 dark:border-white/10 shadow-xl">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="flex flex-col gap-2 max-w-2xl">
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">City Intelligence Matrix</span>
+              <span class="text-xs text-slate-400 font-mono">120 Nodes • 216 Directional Links</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight font-heading text-slate-900 dark:text-white">
+              Hyderabad Urban Corridor Network
+            </h2>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+              Real-time predictive traffic operations, adaptive signal splits, and incident mitigation driven by NeurAX residual intelligence.
+            </p>
+          </div>
+
+          <!-- Quick Action Stats -->
+          <div class="flex flex-wrap items-center gap-4 shrink-0">
+            <a href="commuter.html" class="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 transition-all flex items-center gap-2">
+              <i data-lucide="map" class="w-4 h-4"></i>
+              <span>Launch Live Map</span>
+            </a>
+            <a href="report.html" class="px-5 py-3 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-500 dark:text-rose-400 font-bold text-sm border border-rose-500/30 transition-all flex items-center gap-2">
+              <i data-lucide="megaphone" class="w-4 h-4"></i>
+              <span>Report Road Hazard</span>
+            </a>
+            <a href="police.html" class="px-5 py-3 rounded-2xl liquid-glass-subtle hover:bg-white/20 dark:hover:bg-white/10 text-slate-800 dark:text-white font-bold text-sm transition-all flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4 text-cyan-400"></i>
+              <span>Tactical Command</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top KPI Telemetry Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- Metric 1: Corridor Health -->
+        <div class="liquid-glass p-5 rounded-2xl card-hover theme-transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Monitored Roads</span>
+            <div class="w-8 h-8 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+              <i data-lucide="route" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black font-heading text-slate-900 dark:text-white">216</span>
+            <span class="text-xs text-emerald-500 font-bold">100% Online</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Arterial & collector coverage</p>
+        </div>
+
+        <!-- Metric 2: Active Choke Point -->
+        <div class="liquid-glass p-5 rounded-2xl card-hover theme-transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Choke Incidents</span>
+            <div class="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black font-heading text-rose-500">1</span>
+            <span class="text-xs px-2 py-0.5 rounded font-bold bg-rose-500/15 text-rose-500">Corridor R0067</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Stalled vehicle • Detour engaged</p>
+        </div>
+
+        <!-- Metric 3: Model Latency -->
+        <div class="liquid-glass p-5 rounded-2xl card-hover theme-transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Inference Speed</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black font-heading text-slate-900 dark:text-white font-mono">1.15s</span>
+            <span class="text-xs text-emerald-500 font-bold">216 Corridors</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Direct multi-horizon LightGBM</p>
+        </div>
+
+        <!-- Metric 4: Forecast Accuracy -->
+        <div class="liquid-glass p-5 rounded-2xl card-hover theme-transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Accuracy (R²)</span>
+            <div class="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500">
+              <i data-lucide="target" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black font-heading text-slate-900 dark:text-white font-mono">0.998</span>
+            <span class="text-xs text-purple-500 font-bold">Zero Overfit</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">MAE 0.14 km/h vs 3.82 baseline</p>
+        </div>
+      </section>
+
+      <!-- 4 Role Portals Gateway Cards (Airy, uncluttered, bespoke UI) -->
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold font-heading text-slate-900 dark:text-white">Specialized Operational Portals</h3>
+          <span class="text-xs text-slate-400">Select any module to interact</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Portal Card 1: Commuter -->
+          <a href="commuter.html" class="liquid-glass p-6 rounded-3xl card-hover flex flex-col justify-between group theme-transition">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i data-lucide="map-pin" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold font-mono px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-500">PORTAL 01</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold font-heading text-slate-900 dark:text-white group-hover:text-cyan-400 transition-colors">
+                  Commuter Navigation & Detour Guidance
+                </h4>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  Interactive GIS map with live corridor speeds, instant choke point alerts, and AI detour routing saving up to 23 minutes per trip.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
+              <span>Explore Interactive GIS Map</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </a>
+
+          <!-- Portal Card 2: Police Tactical -->
+          <a href="police.html" class="liquid-glass p-6 rounded-3xl card-hover flex flex-col justify-between group theme-transition">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold font-mono px-3 py-1 rounded-full bg-amber-500/10 text-amber-500">PORTAL 02</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold font-heading text-slate-900 dark:text-white group-hover:text-amber-400 transition-colors">
+                  Traffic Police Tactical Command
+                </h4>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  Adaptive signal split optimizer with green-time sliders, bottleneck queue clearance models, and instant PCR unit deployment.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-amber-600 dark:text-amber-400">
+              <span>Open Signal Split Optimizer</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </a>
+
+          <!-- Portal Card 3: Municipal Infrastructure -->
+          <a href="planner.html" class="liquid-glass p-6 rounded-3xl card-hover flex flex-col justify-between group theme-transition">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i data-lucide="git-pull-request" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold font-mono px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500">PORTAL 03</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold font-heading text-slate-900 dark:text-white group-hover:text-emerald-400 transition-colors">
+                  Municipal Road Widening Planner
+                </h4>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  Simulate capital road expansion across Candidates A through E, calculate VMT congestion reduction, and rank investments by ROI.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              <span>Simulate Infrastructure ROI</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </a>
+
+          <!-- Portal Card 4: AI Forecaster -->
+          <a href="forecaster.html" class="liquid-glass p-6 rounded-3xl card-hover flex flex-col justify-between group theme-transition">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between">
+                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <i data-lucide="trending-up" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold font-mono px-3 py-1 rounded-full bg-purple-500/10 text-purple-500">PORTAL 04</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-bold font-heading text-slate-900 dark:text-white group-hover:text-purple-400 transition-colors">
+                  NeurAX Multi-Horizon AI Forecaster
+                </h4>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                  Interactive 15m, 30m, 45m, and 60m predictive canvas graphs, cause attribution breakdown, and latency telemetry benchmark.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-6 mt-4 border-t border-slate-200/80 dark:border-white/10 text-xs font-semibold text-purple-600 dark:text-purple-400">
+              <span>View Multi-Horizon Predictions</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/drone.js"></script>
+  <script>
+    // Live time updater
+    function updateLiveTime() {
+      const el = document.getElementById('live-time');
+      if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString() + ' IST';
+      }
+    }
+    setInterval(updateLiveTime, 1000);
+    updateLiveTime();
+  </script>
+</body>
+</html>
