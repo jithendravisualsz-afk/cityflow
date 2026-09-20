@@ -227,19 +227,6 @@ python run.py --eval
 ```
 
 Once running, open your browser at **`http://localhost:8000`** to access all 5 specialized operational portals.
-
----
-
-## 📊 Evaluation Checkpoint Alignment (100 / 100 Marks)
-
-| Checkpoint | Target Marks | CityFlow AI Implementation Deliverables | Status |
-| :--- | :---: | :--- | :---: |
-| **Checkpoint 1** | **15 / 15** | Comprehensive problem framing for Hyderabad, mathematical BPR formulations, Mermaid architecture, modular structure. | **100% Completed & Verified** |
-| **Checkpoint 2** | **25 / 25** | Working `cleaner.py` (handles stuck sensors & negative values), 120-node/436-segment graph with turn restrictions, baseline anomaly detection, `verify_checkpoint2.py`. | **100% Completed & Verified** |
-| **Checkpoint 3** | **60 / 60** | Multi-horizon direct LightGBM forecaster (15-60m) with split-conformal 90% uncertainty bounds, tactical detour advisor, municipal road widening simulator (GHMC), dual-role command center (`index.html`). | **100% Completed & Verified** |
-
----
-
 <div align="center">
 <b>NeuraX Hackathon 3.0 • Domain 1: AI in Smart Cities</b><br>
 <i>Engineering Discipline • Mathematical Rigor • Operational Impact</i>
