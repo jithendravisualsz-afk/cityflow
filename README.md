@@ -138,7 +138,7 @@ The NeuraX Smart Cities benchmark injects severe synthetic and real-world sensor
 ## 🗂️ Project Directory Structure
 
 ```
-cityflow-hackathon/
+cityflow/
 ├── .planning/                         # Project Management & GSD Durable State
 │   ├── ROADMAP.md                     # Checkpoint milestones & rubric tracking
 │   ├── STATE.md                       # Current active focus & key decisions
@@ -204,8 +204,8 @@ CityFlow AI runs on Python 3.10+ (tested through Python 3.14 on Windows/Linux/ma
 
 ```bash
 # Clone the repository
-git clone -b main https://github.com/Dineswarkumar/CityFlow-hackathon.git
-cd CityFlow-hackathon
+git clone -b main https://github.com/jithendravisualsz-afk/cityflow.git
+cd cityflow
 
 # Install open-source dependencies
 pip install -r requirements.txt
@@ -227,6 +227,10 @@ python run.py --eval
 ```
 
 Once running, open your browser at **`http://localhost:8000`** to access all 5 specialized operational portals.
+
+---
+
+
 <div align="center">
 <b>NeuraX Hackathon 3.0 • Domain 1: AI in Smart Cities</b><br>
 <i>Engineering Discipline • Mathematical Rigor • Operational Impact</i>
