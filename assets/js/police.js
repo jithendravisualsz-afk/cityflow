@@ -4,7 +4,6 @@
  */
 
 window.CityFlowPolice = (function() {
-window.CityFlowPolice = (function() {
   // Access denied to everyone by default - citizens can only look
   let isOfficerAuthenticated = false;
   let currentRole = 'citizen';
@@ -40,10 +39,13 @@ window.CityFlowPolice = (function() {
     const passField = document.getElementById('police-pass-input');
     const err = document.getElementById('police-login-error');
     const username = (userField ? userField.value : '').trim().toLowerCase();
-    const password = (passField ? passField.value : '').trim();
+    const password = (passField ? passField.value : '').trim().toLowerCase();
 
-    // Required credentials: username: admin, password: admin
-    const valid = (username === 'admin' && password === 'admin');
+    // Primary credentials: admin / admin (also supports police/police)
+    const valid = (username === 'admin' && (password === 'admin' || password === 'admin123')) ||
+                  (username === 'police' && password === 'police') ||
+                  (username === 'admin' && password === 'police') ||
+                  (username === 'police' && password === 'admin');
 
     if (valid) {
       isOfficerAuthenticated = true;
