@@ -4,45 +4,152 @@
  */
 
 window.CityFlowPolice = (function() {
-  let currentRole = 'officer';
+window.CityFlowPolice = (function() {
+  // Session storage check for officer authentication
+  let isOfficerAuthenticated = sessionStorage.getItem('cityflow_officer_auth') === 'true';
+  let currentRole = isOfficerAuthenticated ? 'officer' : 'citizen';
+
+  function isAuthed() {
+    return isOfficerAuthenticated;
+  }
+
+  function openLoginModal() {
+    const modal = document.getElementById('police-login-modal');
+    const err = document.getElementById('police-login-error');
+    if (err) err.classList.add('hidden');
+    if (modal) {
+      modal.classList.remove('hidden');
+      const userField = document.getElementById('police-user-input');
+      if (userField) setTimeout(() => userField.focus(), 100);
+    }
+  }
+
+  function closeLoginModal() {
+    const modal = document.getElementById('police-login-modal');
+    if (modal) modal.classList.add('hidden');
+    // If not authenticated, ensure UI stays in citizen mode
+    if (!isOfficerAuthenticated) {
+      applyRoleUI('citizen');
+    }
+  }
+
+  function submitLogin() {
+    const userField = document.getElementById('police-user-input');
+    const passField = document.getElementById('police-pass-input');
+    const err = document.getElementById('police-login-error');
+    const username = (userField ? userField.value : '').trim().toLowerCase();
+    const password = (passField ? passField.value : '').trim();
+
+    // Accepted demo credentials: police/police, officer/police, admin/admin
+    const valid = (username === 'police' && password === 'police') ||
+                  (username === 'officer' && (password === 'police' || password === '1234')) ||
+                  (username === 'admin' && password === 'admin');
+
+    if (valid) {
+      isOfficerAuthenticated = true;
+      sessionStorage.setItem('cityflow_officer_auth', 'true');
+      closeLoginModal();
+      applyRoleUI('officer');
+      showToast("👮 Authentication Successful! Welcome, Inspector (Badge #4029). Full command access granted.", "emerald");
+      if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(1200, 'triangle', 0.08);
+    } else {
+      if (err) err.classList.remove('hidden');
+      if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(300, 'sawtooth', 0.15);
+    }
+  }
+
+  function logoutOfficer() {
+    isOfficerAuthenticated = false;
+    sessionStorage.removeItem('cityflow_officer_auth');
+    applyRoleUI('citizen');
+    showToast("🔒 Logged out of Tactical Command. Returned to Public Citizen Mode.", "cyan");
+  }
 
   function setRole(role) {
+    if (role === 'officer') {
+      if (!isOfficerAuthenticated) {
+        openLoginModal();
+        return;
+      }
+      applyRoleUI('officer');
+    } else {
+      applyRoleUI('citizen');
+    }
+  }
+
+  function applyRoleUI(role) {
     currentRole = role;
     const officerBtn = document.getElementById('role-officer-btn');
     const citizenBtn = document.getElementById('role-citizen-btn');
     const jurisdictionBadge = document.getElementById('police-jurisdiction-badge');
     const citizenNotice = document.getElementById('police-citizen-notice');
     const applyBtnText = document.getElementById('apply-btn-text');
+    const applyBtn = document.getElementById('apply-signal-btn');
+    const dispatchBtn = document.getElementById('dispatch-unit-btn');
+    const sliderA = document.getElementById('signal-phase-a');
+    const sliderB = document.getElementById('signal-phase-b');
+    const lockBadges = document.querySelectorAll('.officer-lock-badge');
 
     if (role === 'officer') {
       if (officerBtn) {
-        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-1.5';
+        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
       }
       if (citizenBtn) {
-        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5';
+        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
       }
       if (jurisdictionBadge) {
-        jurisdictionBadge.textContent = 'Sector 4 — Cyberabad Jurisdiction (Authorized Officer)';
+        jurisdictionBadge.textContent = 'Sector 4 — Cyberabad Jurisdiction (Officer #4029 Active)';
         jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
       }
       if (citizenNotice) citizenNotice.classList.add('hidden');
       if (applyBtnText) applyBtnText.textContent = 'Broadcast Adaptive Timing to Controller SIG-042';
+
+      // Enable all controls
+      if (sliderA) { sliderA.disabled = false; sliderA.classList.remove('opacity-40', 'cursor-not-allowed'); }
+      if (sliderB) { sliderB.disabled = false; sliderB.classList.remove('opacity-40', 'cursor-not-allowed'); }
+      if (applyBtn) { applyBtn.disabled = false; applyBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+      if (dispatchBtn) { dispatchBtn.disabled = false; dispatchBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+      lockBadges.forEach(b => b.classList.add('hidden'));
+
     } else {
+      // Citizen Public View - Access DENIED to modifying controls
       if (officerBtn) {
-        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5';
+        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
       }
       if (citizenBtn) {
-        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-500 text-white shadow-sm flex items-center gap-1.5';
+        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
       }
       if (jurisdictionBadge) {
-        jurisdictionBadge.textContent = 'Public Citizen Access — Live Police Telemetry & Citizen Intake';
+        jurisdictionBadge.textContent = 'Public Citizen Access (Controls Locked — View-Only Mode)';
         jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30';
       }
       if (citizenNotice) citizenNotice.classList.remove('hidden');
-      if (applyBtnText) applyBtnText.textContent = 'Simulate Signal Timing Optimization';
+      if (applyBtnText) applyBtnText.textContent = '🔒 Controls Locked (Officer Credentials Required)';
+
+      // Strictly DENY access to citizens
+      if (sliderA) { sliderA.disabled = true; sliderA.classList.add('opacity-40', 'cursor-not-allowed'); }
+      if (sliderB) { sliderB.disabled = true; sliderB.classList.add('opacity-40', 'cursor-not-allowed'); }
+      if (applyBtn) { applyBtn.disabled = true; applyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+      if (dispatchBtn) { dispatchBtn.disabled = true; dispatchBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+      lockBadges.forEach(b => b.classList.remove('hidden'));
     }
+
     if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(900, 'sine', 0.05);
     if (window.lucide) window.lucide.createIcons();
+    renderCitizenReports();
+  }
+
+  function showToast(msg, tone = "cyan") {
+    const toast = document.getElementById('police-toast');
+    if (!toast) return;
+    toast.className = `p-3 rounded-xl border text-xs font-bold text-center animate-fadeIn ${
+      tone === 'emerald' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' :
+      tone === 'rose' ? 'bg-rose-500/15 border-rose-500/30 text-rose-400' :
+      'bg-cyan-500/15 border-cyan-500/30 text-cyan-400'
+    }`;
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 4500);
   }
 
   function init() {
@@ -56,6 +163,8 @@ window.CityFlowPolice = (function() {
     if (applyBtn) applyBtn.addEventListener('click', applySignalPlan);
     if (dispatchBtn) dispatchBtn.addEventListener('click', dispatchPatrol);
 
+    // Initial state setup
+    applyRoleUI(currentRole);
     updateSignalMetrics();
   }
 
@@ -87,16 +196,21 @@ window.CityFlowPolice = (function() {
   }
 
   function applySignalPlan() {
-    if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(1040, 'triangle', 0.08);
-    const toast = document.getElementById('police-toast');
-    if (toast) {
-      toast.textContent = "✅ Adaptive timing broadcast to Signal Controller SIG-HYD-042!";
-      toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 4000);
+    if (!isOfficerAuthenticated) {
+      showToast("⛔ Access Denied: Public users cannot modify traffic signals. Please authenticate as an Officer.", "rose");
+      openLoginModal();
+      return;
     }
+    if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(1040, 'triangle', 0.08);
+    showToast("✅ Adaptive timing broadcast to Signal Controller SIG-HYD-042!", "emerald");
   }
 
   function dispatchPatrol() {
+    if (!isOfficerAuthenticated) {
+      showToast("⛔ Access Denied: Citizen users cannot dispatch police interceptors. Please authenticate as an Officer.", "rose");
+      openLoginModal();
+      return;
+    }
     if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(650, 'sawtooth', 0.12);
     const logList = document.getElementById('dispatch-log-list');
     if (logList) {
@@ -109,6 +223,7 @@ window.CityFlowPolice = (function() {
       `;
       logList.prepend(li);
     }
+    showToast("🚓 PCR Patrol Unit 07 Dispatched to Corridor R0067!", "emerald");
   }
 
   function renderCitizenReports() {
@@ -164,6 +279,12 @@ window.CityFlowPolice = (function() {
   }
 
   function dispatchPCRToIncident(incId, corridor) {
+    if (!isOfficerAuthenticated) {
+      showToast("⛔ Access Denied: Police authentication required to assign patrol units.", "rose");
+      openLoginModal();
+      return;
+    }
+
     if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(680, 'sawtooth', 0.12);
     const logList = document.getElementById('dispatch-log-list');
     const unitNum = Math.floor(10 + Math.random() * 20);
@@ -203,6 +324,11 @@ window.CityFlowPolice = (function() {
 
   return {
     setRole,
+    openLoginModal,
+    closeLoginModal,
+    submitLogin,
+    logoutOfficer,
+    isAuthed,
     updateSignalMetrics,
     applySignalPlan,
     dispatchPatrol,
