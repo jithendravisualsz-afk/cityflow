@@ -4,6 +4,47 @@
  */
 
 window.CityFlowPolice = (function() {
+  let currentRole = 'officer';
+
+  function setRole(role) {
+    currentRole = role;
+    const officerBtn = document.getElementById('role-officer-btn');
+    const citizenBtn = document.getElementById('role-citizen-btn');
+    const jurisdictionBadge = document.getElementById('police-jurisdiction-badge');
+    const citizenNotice = document.getElementById('police-citizen-notice');
+    const applyBtnText = document.getElementById('apply-btn-text');
+
+    if (role === 'officer') {
+      if (officerBtn) {
+        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-1.5';
+      }
+      if (citizenBtn) {
+        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5';
+      }
+      if (jurisdictionBadge) {
+        jurisdictionBadge.textContent = 'Sector 4 — Cyberabad Jurisdiction (Authorized Officer)';
+        jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+      }
+      if (citizenNotice) citizenNotice.classList.add('hidden');
+      if (applyBtnText) applyBtnText.textContent = 'Broadcast Adaptive Timing to Controller SIG-042';
+    } else {
+      if (officerBtn) {
+        officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5';
+      }
+      if (citizenBtn) {
+        citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-500 text-white shadow-sm flex items-center gap-1.5';
+      }
+      if (jurisdictionBadge) {
+        jurisdictionBadge.textContent = 'Public Citizen Access — Live Police Telemetry & Citizen Intake';
+        jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30';
+      }
+      if (citizenNotice) citizenNotice.classList.remove('hidden');
+      if (applyBtnText) applyBtnText.textContent = 'Simulate Signal Timing Optimization';
+    }
+    if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(900, 'sine', 0.05);
+    if (window.lucide) window.lucide.createIcons();
+  }
+
   function init() {
     const sliderA = document.getElementById('signal-phase-a');
     const sliderB = document.getElementById('signal-phase-b');
@@ -161,6 +202,7 @@ window.CityFlowPolice = (function() {
   window.addEventListener('cityflowIncidentsUpdated', renderCitizenReports);
 
   return {
+    setRole,
     updateSignalMetrics,
     applySignalPlan,
     dispatchPatrol,

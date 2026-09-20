@@ -118,11 +118,23 @@
     <header class="h-16 liquid-glass border-b border-slate-200/80 dark:border-white/10 px-8 flex items-center justify-between sticky top-0 z-30 shrink-0 theme-transition">
       <div class="flex items-center gap-3">
         <h1 class="text-lg font-bold tracking-tight font-heading text-slate-900 dark:text-white">Traffic Police Tactical Command Center</h1>
-        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">Sector 4 — Cyberabad Jurisdiction</span>
+        <span id="police-jurisdiction-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">Sector 4 — Cyberabad Jurisdiction (Authorized Officer)</span>
       </div>
 
       <div class="flex items-center gap-3">
-        <button id="dispatch-unit-btn" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition-all flex items-center gap-2">
+        <!-- Dual-Role Switcher (Enables both Citizens and Police Officers to interact with the portal) -->
+        <div class="flex items-center p-1 rounded-xl liquid-glass-subtle border border-slate-200/60 dark:border-white/10 text-xs">
+          <button id="role-officer-btn" onclick="CityFlowPolice.setRole('officer')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            <span>Officer Mode</span>
+          </button>
+          <button id="role-citizen-btn" onclick="CityFlowPolice.setRole('citizen')" class="px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+            <span>Citizen Public Mode</span>
+          </button>
+        </div>
+
+        <button id="dispatch-unit-btn" class="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition-all flex items-center gap-2 cursor-pointer">
           <i data-lucide="siren" class="w-4 h-4"></i>
           <span>Dispatch PCR Patrol</span>
         </button>
@@ -131,6 +143,31 @@
 
     <!-- Content -->
     <main class="flex-1 p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+
+      <!-- Citizen Public Notice (Visible when toggled to Citizen Mode) -->
+      <div id="police-citizen-notice" class="hidden liquid-glass p-5 rounded-3xl border border-cyan-500/30 bg-cyan-500/5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+            <i data-lucide="info" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white font-heading">Citizen Transparency & Live Police Telemetry Mode</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+              Normal commuters can monitor live police operations, simulate how adaptive signal timings dissolve traffic jams, or submit instant field incident reports.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="report.html" class="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow transition-all flex items-center gap-1.5">
+            <i data-lucide="megaphone" class="w-3.5 h-3.5"></i>
+            <span>Report Road Incident</span>
+          </a>
+          <a href="commuter.html" class="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs shadow transition-all flex items-center gap-1.5">
+            <i data-lucide="map" class="w-3.5 h-3.5"></i>
+            <span>View Commuter Detour</span>
+          </a>
+        </div>
+      </div>
 
       <!-- Active Incident Emergency Banner -->
       <section class="liquid-glass p-6 rounded-3xl border-l-4 border-l-rose-500 border border-white/40 dark:border-white/10 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -203,9 +240,9 @@
           <div id="police-toast" class="hidden p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold text-center"></div>
 
           <!-- Apply Button -->
-          <button id="apply-signal-btn" class="w-full py-3.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2">
+          <button id="apply-signal-btn" class="w-full py-3.5 rounded-2xl bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer">
             <i data-lucide="radio" class="w-4 h-4"></i>
-            <span>Broadcast Adaptive Timing to Controller SIG-042</span>
+            <span id="apply-btn-text">Broadcast Adaptive Timing to Controller SIG-042</span>
           </button>
         </div>
 
