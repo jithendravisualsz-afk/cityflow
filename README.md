@@ -93,7 +93,7 @@ To forecast speed across four discrete horizons $\tau \in \{15, 30, 45, 60\}$ mi
 - **Direct Strategy**: Four dedicated gradient-boosted models (one per horizon), eliminating error accumulation from autoregressive rolling.
 - **Residual Formulation**: Rather than forcing trees to memorize diurnal cycles, models predict the residual over the segment's historical hour-of-week baseline:
   $$\Delta \hat{v}_{e, t+\tau} = f_\theta^{(\tau)}\left(X_{e, t}\right), \quad \hat{v}_{e, t+\tau} = \bar{v}_e(\text{hour\_of\_week}) + \Delta \hat{v}_{e, t+\tau}$$
-- **Derived Congestion Index ($CI$)**: Downstream modules derive $CI = \max(0, \min(1, 1 - \hat{v}/v_{f,e}))$ to guarantee a single consistent source of truth.
+- **Derived Congestion Index ($CI$)**: Downstream modules derive $CI = \max(0, \ min(1, 1 - \hat{v}/v_{f,e}))$ to guarantee a single consistent source of truth.
 - **Conformal Uncertainty Bounds**: Evaluates empirical non-conformity scores on validation residuals to compute rigorous distribution-free prediction intervals $[\hat{v} - q_{0.9}, \hat{v} + q_{0.9}]$ with guaranteed test coverage.
 
 ### 3. Residual-Based Incident Detection & Multi-Class Cause Attribution
@@ -151,7 +151,7 @@ cityflow-hackathon/
 │
 ├── index.html                         # Executive Mission Control & Gateway
 ├── commuter.html                      # Commuter Navigation & Live GIS Map
-├── police.html                        # Traffic Police Tactical Command
+├── police.html                        # Tactical Police Command
 ├── planner.html                       # Municipal Infrastructure Planner
 ├── forecaster.html                    # NeurAX Multi-Horizon AI Forecaster
 │
@@ -244,5 +244,3 @@ Once running, open your browser at **`http://localhost:8000`** to access all 5 s
 <b>NeuraX Hackathon 3.0 • Domain 1: AI in Smart Cities</b><br>
 <i>Engineering Discipline • Mathematical Rigor • Operational Impact</i>
 </div>
-#   c i t y f l o w  
- 
