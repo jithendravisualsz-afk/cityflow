@@ -5,9 +5,9 @@
 
 window.CityFlowPolice = (function() {
 window.CityFlowPolice = (function() {
-  // Session storage check for officer authentication
-  let isOfficerAuthenticated = sessionStorage.getItem('cityflow_officer_auth') === 'true';
-  let currentRole = isOfficerAuthenticated ? 'officer' : 'citizen';
+  // Access denied to everyone by default - citizens can only look
+  let isOfficerAuthenticated = false;
+  let currentRole = 'citizen';
 
   function isAuthed() {
     return isOfficerAuthenticated;
@@ -20,6 +20,9 @@ window.CityFlowPolice = (function() {
     if (modal) {
       modal.classList.remove('hidden');
       const userField = document.getElementById('police-user-input');
+      const passField = document.getElementById('police-pass-input');
+      if (userField) userField.value = '';
+      if (passField) passField.value = '';
       if (userField) setTimeout(() => userField.focus(), 100);
     }
   }
@@ -27,7 +30,6 @@ window.CityFlowPolice = (function() {
   function closeLoginModal() {
     const modal = document.getElementById('police-login-modal');
     if (modal) modal.classList.add('hidden');
-    // If not authenticated, ensure UI stays in citizen mode
     if (!isOfficerAuthenticated) {
       applyRoleUI('citizen');
     }
@@ -40,17 +42,14 @@ window.CityFlowPolice = (function() {
     const username = (userField ? userField.value : '').trim().toLowerCase();
     const password = (passField ? passField.value : '').trim();
 
-    // Accepted demo credentials: police/police, officer/police, admin/admin
-    const valid = (username === 'police' && password === 'police') ||
-                  (username === 'officer' && (password === 'police' || password === '1234')) ||
-                  (username === 'admin' && password === 'admin');
+    // Required credentials: username: admin, password: admin
+    const valid = (username === 'admin' && password === 'admin');
 
     if (valid) {
       isOfficerAuthenticated = true;
-      sessionStorage.setItem('cityflow_officer_auth', 'true');
       closeLoginModal();
       applyRoleUI('officer');
-      showToast("👮 Authentication Successful! Welcome, Inspector (Badge #4029). Full command access granted.", "emerald");
+      showToast("👮 Verified as Admin! Welcome, Officer #4029. Operational controls unlocked.", "emerald");
       if (window.CityFlow && window.CityFlow.playBeep) window.CityFlow.playBeep(1200, 'triangle', 0.08);
     } else {
       if (err) err.classList.remove('hidden');
@@ -60,9 +59,8 @@ window.CityFlowPolice = (function() {
 
   function logoutOfficer() {
     isOfficerAuthenticated = false;
-    sessionStorage.removeItem('cityflow_officer_auth');
     applyRoleUI('citizen');
-    showToast("🔒 Logged out of Tactical Command. Returned to Public Citizen Mode.", "cyan");
+    showToast("🔒 Locked out. You are now in Public Citizen View (Look-Only).", "cyan");
   }
 
   function setRole(role) {
@@ -89,8 +87,9 @@ window.CityFlowPolice = (function() {
     const sliderA = document.getElementById('signal-phase-a');
     const sliderB = document.getElementById('signal-phase-b');
     const lockBadges = document.querySelectorAll('.officer-lock-badge');
+    const logoutBtn = document.getElementById('officer-logout-btn');
 
-    if (role === 'officer') {
+    if (role === 'officer' && isOfficerAuthenticated) {
       if (officerBtn) {
         officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
       }
@@ -98,21 +97,23 @@ window.CityFlowPolice = (function() {
         citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
       }
       if (jurisdictionBadge) {
-        jurisdictionBadge.textContent = 'Sector 4 — Cyberabad Jurisdiction (Officer #4029 Active)';
+        jurisdictionBadge.textContent = 'Admin Mode: Officer #4029 Active (Sector 4 Cyberabad)';
         jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
       }
       if (citizenNotice) citizenNotice.classList.add('hidden');
       if (applyBtnText) applyBtnText.textContent = 'Broadcast Adaptive Timing to Controller SIG-042';
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
 
-      // Enable all controls
-      if (sliderA) { sliderA.disabled = false; sliderA.classList.remove('opacity-40', 'cursor-not-allowed'); }
-      if (sliderB) { sliderB.disabled = false; sliderB.classList.remove('opacity-40', 'cursor-not-allowed'); }
-      if (applyBtn) { applyBtn.disabled = false; applyBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
-      if (dispatchBtn) { dispatchBtn.disabled = false; dispatchBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+      // Unlocked: enable sliders and control buttons
+      if (sliderA) { sliderA.disabled = false; sliderA.style.pointerEvents = 'auto'; sliderA.classList.remove('opacity-30', 'cursor-not-allowed'); }
+      if (sliderB) { sliderB.disabled = false; sliderB.style.pointerEvents = 'auto'; sliderB.classList.remove('opacity-30', 'cursor-not-allowed'); }
+      if (applyBtn) { applyBtn.disabled = false; applyBtn.classList.remove('opacity-40', 'cursor-not-allowed'); }
+      if (dispatchBtn) { dispatchBtn.disabled = false; dispatchBtn.classList.remove('opacity-40', 'cursor-not-allowed'); }
       lockBadges.forEach(b => b.classList.add('hidden'));
 
     } else {
-      // Citizen Public View - Access DENIED to modifying controls
+      // Citizen Look-Only Mode: Strictly deny all modifying access
+      currentRole = 'citizen';
       if (officerBtn) {
         officerBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
       }
@@ -120,17 +121,18 @@ window.CityFlowPolice = (function() {
         citizenBtn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-cyan-500 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
       }
       if (jurisdictionBadge) {
-        jurisdictionBadge.textContent = 'Public Citizen Access (Controls Locked — View-Only Mode)';
+        jurisdictionBadge.textContent = 'Public Citizen Mode (Look-Only Telemetry — Changes Denied)';
         jurisdictionBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30';
       }
       if (citizenNotice) citizenNotice.classList.remove('hidden');
-      if (applyBtnText) applyBtnText.textContent = '🔒 Controls Locked (Officer Credentials Required)';
+      if (applyBtnText) applyBtnText.textContent = '🔒 Access Denied (Admin Officer Login Required)';
+      if (logoutBtn) logoutBtn.classList.add('hidden');
 
-      // Strictly DENY access to citizens
-      if (sliderA) { sliderA.disabled = true; sliderA.classList.add('opacity-40', 'cursor-not-allowed'); }
-      if (sliderB) { sliderB.disabled = true; sliderB.classList.add('opacity-40', 'cursor-not-allowed'); }
-      if (applyBtn) { applyBtn.disabled = true; applyBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
-      if (dispatchBtn) { dispatchBtn.disabled = true; dispatchBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+      // Strictly lock sliders and buttons
+      if (sliderA) { sliderA.disabled = true; sliderA.style.pointerEvents = 'none'; sliderA.classList.add('opacity-30', 'cursor-not-allowed'); }
+      if (sliderB) { sliderB.disabled = true; sliderB.style.pointerEvents = 'none'; sliderB.classList.add('opacity-30', 'cursor-not-allowed'); }
+      if (applyBtn) { applyBtn.disabled = true; applyBtn.classList.add('opacity-40', 'cursor-not-allowed'); }
+      if (dispatchBtn) { dispatchBtn.disabled = true; dispatchBtn.classList.add('opacity-40', 'cursor-not-allowed'); }
       lockBadges.forEach(b => b.classList.remove('hidden'));
     }
 
@@ -262,10 +264,17 @@ window.CityFlowPolice = (function() {
               <h5 class="text-xs font-bold text-slate-900 dark:text-white font-heading mt-0.5">${inc.corridorName || inc.corridor}</h5>
               <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">${inc.description || 'Reported blockage'}</p>
             </div>
-            <button onclick="CityFlowPolice.dispatchPCRToIncident('${inc.id}', '${inc.corridor}')" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1 shrink-0 transition-all cursor-pointer">
-              <i data-lucide="siren" class="w-3 h-3"></i>
-              <span>Assign Unit</span>
-            </button>
+            ${isOfficerAuthenticated ? `
+              <button onclick="CityFlowPolice.dispatchPCRToIncident('${inc.id}', '${inc.corridor}')" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1 shrink-0 transition-all cursor-pointer">
+                <i data-lucide="siren" class="w-3 h-3"></i>
+                <span>Assign Unit</span>
+              </button>
+            ` : `
+              <button onclick="CityFlowPolice.openLoginModal()" class="px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-white/10 text-slate-500 dark:text-slate-400 font-bold text-[10px] shadow-sm flex items-center gap-1 shrink-0 cursor-pointer" title="Admin Login Required">
+                <i data-lucide="lock" class="w-3 h-3 text-amber-500"></i>
+                <span>Admin Locked</span>
+              </button>
+            `}
           </div>
           <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-white/5">
             <span>By: <strong>${inc.reporter || 'Citizen'}</strong></span>
